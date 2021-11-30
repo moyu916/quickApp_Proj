@@ -29,12 +29,12 @@
     "logLevel": "debug"
   },
   "router": {
-    "entry": "pages/Demo",
+    "entry": "pages/home",
     "pages": {
-      "pages/Demo": {
+      "pages/home": {
         "component": "index"
       },
-      "pages/DemoDetail": {
+      "pages/AddTaskPage": {
         "component": "index"
       }
     },
@@ -56,11 +56,11 @@
     "titleBarBackgroundColor": "#f2f2f2",
     "titleBarTextColor": "#414141",
     "pages": {
-      "pages/Demo": {
-        "titleBarText": "快应用示例模版"
+      "pages/home": {
+        "titleBarText": "主页"
       },
-      "pages/DemoDetail": {
-        "titleBarText": "详情页"
+      "pages/AddTaskPage": {
+        "titleBarText": "添加任务"
       }
     }
   }

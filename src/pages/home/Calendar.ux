@@ -1,0 +1,49 @@
+<import name="my-calendar" src="apex-ui/components/calendar/index"></import>
+
+<template>
+    <div class="wrapper">
+        <div class="line">
+            <text onclick="changeOpen">联程使用</text>
+            <my-calendar visible="{{open}}" trip="round" onschedule="getSchedule"></my-calendar>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            open:false,
+            num:8,
+            bgColor:'#ffffff',
+            desc:'请选择任务的开始和结束时间',
+            subColor:'aliceblue',
+            tapArray:['#f7c992', '#ffe4c4']
+        }
+    },
+    getSchedule(e){
+        this.open = false
+        console.log(JSON.parse(e.detail.data))
+    },
+    changeOpen(){
+        this.open = !this.open
+        console.log(this.open)
+    },
+}
+</script>
+
+<style lang="less">
+.wrapper {
+    flex-direction: column;
+    .line {
+        flex-direction: column;
+        justify-content: space-between;
+        height: 300px;
+        border-bottom-color: #bbbec4;
+        border-bottom-width: 1px;
+        width: 100%;
+        align-items: center;
+        padding: 0 20px;
+    }
+}
+</style>

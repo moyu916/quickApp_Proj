@@ -1,0 +1,72 @@
+<import name="my-calendar" src="apex-ui/components/calendar/index"></import>
+<import name="my-icon" src="../../assets/icon/index"></import>
+<import name="my-input" src="apex-ui/components/input/index"></import>
+
+<template>
+    <div class="wrapper">
+        <div class="line">
+            <text>{{ date }}</text>
+            <my-icon onclick="changeOpen" type="arrow-dropright-circle" size="50" color="#ddd"></my-icon>
+            <my-calendar visible="{{open}}" trip="round" onschedule="getSchedule"></my-calendar>
+        </div>
+        <div class="line">
+            <my-input onChange="handleTimeValue" class="input" placeholder="请输入任务的打卡时间, 例: 07:00-8:30" style="width:100%; font-size:32px"></my-input>
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            open:false,
+            num:8,
+            bgColor:'#ffffff',
+            desc:'请选择任务的开始和结束时间',
+            subColor:'aliceblue',
+            tapArray:['#f7c992', '#ffe4c4'],
+            date: '请选择任务的日期范围'
+        }
+    },
+    getSchedule(e){
+        this.open = false
+        const { year: startYear, month: startMonth, day: startDay } = JSON.parse(e.detail.data).start
+        const { year: endYear, month: endMonth, day: endDay } = JSON.parse(e.detail.data).end
+        this.date = `${startYear}/${startMonth}/${startDay} - ${endYear}/${endMonth}/${endDay}`
+        this.$emit('date', { params: e.detail.data })
+        // console.log(JSON.parse(e.detail.data))
+    },
+    changeOpen(){
+        this.open = !this.open
+        // console.log(this.open)
+    },
+
+    handleTimeValue(e) {
+        this.$emit('time', { params: e.detail.value })
+    }
+}
+</script>
+
+<style lang="less">
+.wrapper {
+    flex-direction: column;
+    .line {
+        flex-direction: row;
+        justify-content: space-between;
+        height: 150px;
+        border-bottom-color: #bbbec4;
+        border-bottom-width: 1px;
+        width: 100%;
+        align-items: center;
+        padding: 0 20px;
+        /* .icon {
+            width: 30px;
+            height: 30px;
+        } */
+        .input {
+            padding-left: -20px;
+            width: 100%;
+        }
+    }
+}
+</style>

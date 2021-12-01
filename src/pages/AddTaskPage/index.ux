@@ -1,22 +1,93 @@
 <import name="my-card" src="./Card.ux"></import>
+<import name="my-divider" src="apex-ui/components/divider/index"></import>
+<import name="my-input" src="apex-ui/components/input/index"></import>
+<import name="my-accordion" src="./accordion/index.ux"></import>
+<import name="my-accordion-group" src="./accordion-group/index.ux"></import>
+<import name="my-button" src="apex-ui/components/button/index"></import>
+
+<import name="Calendar" src="./Calendar.ux"></import>
 
 <template>
   <!-- template里只能有一个根节点 -->
   <div class="wrapper">
-    <div class="top">
 
-    </div>
+        <my-card>
+          <div class="task">
+            <my-input onChange="handleTaskValue" placeholder="请输入你的任务" style="width:100%; height: 150px; font-size:35px"></my-input>
+            <my-divider></my-divider>
+            <div class="task-list">
+              <div class="task-list-item" for="{{ tasks }}">
+                <text>{{ $item }}</text>
+              </div>
+            </div>
+            <my-divider></my-divider>
+            <my-accordion-group id="default"  onchange="handleChange">
+              <my-accordion class="acc" group-id="default" title="更多常用任务" content="12点睡觉"></my-accordion>
+            </my-accordion-group>
+          </div>
+        </my-card>
+
+        <my-card>
+          <div class="time">
+            <Calendar onDate="handleDateValue" onTime="handleTimeValue"></Calendar>
+          </div>
+        </my-card>
+
+        <my-card>
+          <div slot="title">
+            <text class="note">备注</text>
+          </div>
+          <my-input onChange="handleNoteValue" placeholder="请输入备注内容" style="width:100%; height: 200px; font-size:30px"></my-input>
+        </my-card>
+
+        <my-button type="success" ontap="tap" shape="round" size="small">确定</my-button>
 
   </div>
 </template>
 
 <script>
+import router from '@system.router'
+
 export default {
   data() {
     return {
-
+      tasks: ['背单词+', '专业课+', '画快题+', '起床+', '做阅读+', '背政治+'],
+      formData: {
+        task: '',
+        startDate: {},
+        endDate: {},
+        time: '',
+        note: ''
+      }
     }
   },
+
+  handleTaskValue(e) {
+    this.formData.task = e.detail.value
+  },
+
+  handleDateValue(e) {
+    this.formData.startDate = JSON.parse(e.detail.params).start;
+    this.formData.endDate = JSON.parse(e.detail.params).end;
+    console.log(JSON.parse(e.detail.params))
+  },
+
+  handleTimeValue(e) {
+    this.formData.time = e.detail.params
+  },
+
+  handleNoteValue(e) {
+    this.formData.note = e.detail.value
+  },
+
+  tap() {
+    console.log('form', this.formData)
+    router.push({
+      uri: '/pages/home',
+    })
+  }
+
+
 }
 </script>
 
@@ -24,6 +95,45 @@ export default {
 @import './../../assets/styles/style.less';
 
 .wrapper {
+  background-color: #f7f7f7;
+  flex-direction: column;
+  .title {
+    padding: 20px;
+  }
+  .task {
+    flex-direction: column;
 
+  }
+  .task-list {
+    width: 100%;
+    height: 180px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-content: space-around;
+    &-item{
+      height: 65px;
+      flex-basis: 200px;
+      border: 1px solid #808080;
+      border-radius: 50px;
+      text{
+        font-size: 30px;
+        margin: 0 auto;
+      }
+    }    
+  }
+
+  .acc {
+    flex-direction: column;
+  }
 }
+.demo{
+  font-size: 100px;
+}
+.note{
+  font-size: 35px;
+  color: #1c2438;
+}
+
+
 </style>

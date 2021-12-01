@@ -1,7 +1,8 @@
 
-<import name="Calendar" src="./Calendar.ux"></import>
+
 <import name="my-tabbar" src="../../Components/tabbar.ux"></import>
 <import name="my-divider" src="apex-ui/components/divider/index"></import>
+<import name="my-radio" src="./radio"></import>
  
 
 <template>
@@ -12,16 +13,13 @@
 
         <text style="font-size: 60px;">{{countDown}}天</text>
         <text>2022考研倒计时</text>
-        <div style="margin: 20px 0; flex-direction:column;">
+        <div style="margin: 20px 0; height:100px; flex-direction:column; justify-content:space-around;">
           <text>满怀激情地投入到对事物的探究中来，</text>
           <text>至于建筑变成了自然而然的结果。</text>
         </div>
 
         <text class="btn">打卡</text>
 
-        <div>
-          本周任务
-        </div>
       </div>
     </div>
 
@@ -35,13 +33,20 @@
       <div class="header">
         <text style="font-size:40px; font-weight:bold;">今日任务</text>
         <div onclick="showTaskList">
-          <text style="font-size:35px; font-weight:bold; color: #BFBF3F;">+添加</text>
+          <text style="font-size:35px; font-weight:bold; color: #1f3141;">+添加</text>
         </div>
-        
-      </div>    
-    </div>
+      </div>  
 
-    <Calendar></Calendar>
+      <div class="my-task-list" for={{taskData}}>
+        <div class="item">
+          <my-radio value="{{ $item.name }}" checked="{{ $item.checked }}" color="#1f3141" onchange="handleChange($idx)"></my-radio>
+          <text style="color: {{ $item.checked ? '' :  '#1f3141'}};">{{ $item.time }}</text>
+          <!-- <text if="{{ $item.checked }}" style="text-decoration:line-through;">{{ $item.time }}</text>
+          <text else style="color: #BFBF3F">{{ $item.time }}</text> -->
+        </div>
+        <my-divider></my-divider>
+      </div>  
+    </div>
 
   </div>
 </template>
@@ -88,7 +93,21 @@ export default {
               text: '问学长',
               active: false
           }
-      ]
+      ],
+      taskData: [
+        {
+          name: '背单词',
+          date: ['1638343262572','1638516062000'],
+          time: '07:00-08:30',
+          checked: false,
+        },
+        {
+          name: '刷题',
+          date: ['1638516062000','1639380062000'],
+          time: '17:00-18:30',
+          checked: false,
+        }
+      ],
     }
   },
 
@@ -120,6 +139,10 @@ export default {
     router.push({
       uri: '/pages/AddTaskPage',
     })
+  },
+
+  handleChange(idx) {
+    this.taskData[idx].checked = !this.taskData[idx].checked
   }
 }
 </script>
@@ -142,6 +165,7 @@ export default {
   .top {
     display: flex;
     flex-direction: column;
+    justify-content: space-around;
     width: 100%;
     height: 300px;
     margin: 30px;
@@ -170,11 +194,21 @@ export default {
 
   .bottom {
     width: 100%;
+    flex-direction: column;
     .header {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      padding: 10px 20px;
+      padding: 20px;
+    }
+
+    .my-task-list {
+      width: 100%;
+      flex-direction: column;
+      .item {
+        height: 100px;
+        margin: 0 20px;
+      }
     }
 
 

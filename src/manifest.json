@@ -17,6 +17,18 @@
     },
     {
       "name": "system.fetch"
+    },
+    {
+      "name": "system.storage"
+    },
+    {
+      "name": "service.asr"
+    },
+    {
+      "name": "service.share",
+      "params": {
+        "qqKey": "1112074519"
+      }
     }
   ],
   "permissions": [

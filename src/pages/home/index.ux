@@ -1,8 +1,7 @@
-
-
-<import name="my-tabbar" src="../../Components/tabbar.ux"></import>
 <import name="my-divider" src="apex-ui/components/divider/index"></import>
 <import name="my-radio" src="./radio"></import>
+<import name="my-divider" src="apex-ui/components/divider/index"></import>
+
  
 
 <template>
@@ -20,11 +19,16 @@
 
         <text class="btn">打卡</text>
 
+        <text class="now"> 今天是 {{ now }} 日, 星期 {{ day }}</text>
+
       </div>
     </div>
 
     <div class="middle">
-      <my-tabbar tabbar='{{tabbarData}}'></my-tabbar>
+      <div class="tabbar" for="{{tabbarData}}" onclick="handleRouterChange($item.pagePath)">
+        <img src="{{$item.iconPath}}" alt="">
+        <text>{{$item.text}}</text>
+      </div>
     </div>
 
     <my-divider></my-divider>
@@ -37,14 +41,33 @@
         </div>
       </div>  
 
-      <div class="my-task-list" for={{taskData}}>
-        <div class="item">
-          <my-radio value="{{ $item.name }}" checked="{{ $item.checked }}" color="#1f3141" onchange="handleChange($idx)"></my-radio>
-          <text style="color: {{ $item.checked ? '' :  '#1f3141'}};">{{ $item.time }}</text>
-          <!-- <text if="{{ $item.checked }}" style="text-decoration:line-through;">{{ $item.time }}</text>
-          <text else style="color: #BFBF3F">{{ $item.time }}</text> -->
+      <div show="{{state === 2}}" class="state-ok">
+        <div class="img-wrapper">
+          <img src="../../assets/images/state_ok.png" alt="">
         </div>
+        
+        <text>坚持每天完成一小步</text>
+        <text>考研成功一大步</text>
         <my-divider></my-divider>
+      </div>
+
+      <div  if="{{taskData2.length}}" class="my-task-list" for={{taskData2}}>
+        <div class="item">
+          <my-radio value="{{ $item.name }}" checked="{{ $item.checked }}" color="#bac9d6" onchange="handleChange($idx)"></my-radio>
+          <text style="padding-left:30px; font-size:32px; color: {{ $item.checked ? '' :  '#1f3141'}}; text-decoration: {{ $item.checked ? 'line-through' : '' }}; height: 88px; ">{{ $item.time }}</text>
+          <text style="height: 88px; font-size: 32px; padding-left: 30px; text-decoration: {{ $item.checked ? 'line-through' : ''}} ">{{ $item.note }}</text>
+        </div>
+        <text style="padding-left: 40px">{{ dayjs($item.date[0]).format('YYYY-MM-DD') }} ——— {{dayjs($item.date[1]).format('YYYY-MM-DD')}}</text>
+        <!-- <text style="padding-left: 40px">{{ $item.date[0] }} ——— {{$item.date[1]}}</text> -->
+        <my-divider></my-divider>
+      </div>
+
+      <div else class="add-text">
+        <img src="../../assets/images/addText.png" alt="">
+        <div class="text">
+          <text style="font-size: 35px; padding-bottom: 15px; color:#000000;">添加学习任务</text>
+          <text>每日离梦想更进一步</text>
+        </div>
       </div>  
     </div>
 
@@ -53,6 +76,9 @@
 
 <script>
 import router from '@system.router'
+import storage from '@system.storage'
+import share from '@service.share'
+import dayjs from 'dayjs'
 
 export default {
   // 页面级组件的数据模型，影响传入数据的覆盖机制：private内定义的属性不允许被覆盖
@@ -64,56 +90,85 @@ export default {
     return {
       countDown:0,
       examTime: 1640361600000,
+      now: dayjs(Date.now()).format('YYYY-MM-DD'),
+      day: '',
       tabbarData: [
           {
               iconPath: '../../assets/images/tab1.png',
-              selectedIconPath: '../../assets/images/tab1.png',
-              pagePath: '/pages/tabbar',
+              pagePath: '/pages/TabBar/page1',
               text: '题库',
               active: false
           },
           {
               iconPath: '../../assets/images/tab2.png',
-              selectedIconPath: '../../assets/images/tab2.png',
-              pagePath: '/pages/tabbar/page1',
+              pagePath: '/pages/TabBar/page2',
               text: '背单词',
               active: false
           },
           {
               iconPath: '../../assets/images/tab3.png',
-              selectedIconPath: '../../assets/images/tab3.png',
-              pagePath: '/pages/tabbar/page2',
+              pagePath: '/pages/TabBar/page3',
               text: '百科',
               active: false
           },
           {
               iconPath: '../../assets/images/tab4.png',
-              selectedIconPath: '../../assets/images/tab4.png',
-              pagePath: '/pages/tabbar/page2',
+              pagePath: '/pages/TabBar',
               text: '问学长',
               active: false
           }
       ],
       taskData: [
-        {
-          name: '背单词',
-          date: ['1638343262572','1638516062000'],
-          time: '07:00-08:30',
-          checked: false,
-        },
-        {
-          name: '刷题',
-          date: ['1638516062000','1639380062000'],
-          time: '17:00-18:30',
-          checked: false,
-        }
+        // {
+        //   name: '背单词',
+        //   date: [1638343262,1638516062],
+        //   time: '07:00-08:30',
+        //   note: '',
+        //   checked: false,
+        // },
+        // {
+        //   name: '刷题',
+        //   date: [1638516062,1639380062],
+        //   time: '17:00-18:30',
+        //   note: '',
+        //   checked: false,
+        // }
       ],
+      taskData2: [],
+      state: 0 // 0 无任务 1 有任务 2 任务完成
     }
   },
 
   onInit() {
+    console.log('init')
+    this.dayjs = dayjs
     // 计算考研倒计时天数
     this.countDown = Math.floor((this.examTime - Date.now()) / (1000 * 60 * 60 * 24))
+
+    // 计算星期几
+    const a = new Array("日", "一", "二", "三", "四", "五", "六");
+    let tmp = new Date().getDay();
+    this.day = a[tmp];
+
+
+    // 
+    let self = this
+    storage.get({
+      key: 'totalTaskData',
+      success: function(data) {
+        let arr = data ? JSON.parse(data) : []
+        
+        if (!arr.length) {
+          storage.set({
+            key: 'totalTaskData',
+            value: JSON.stringify(self.taskData)
+            // value: '[]'
+          })
+        }
+      }
+    })
+
+
     // --------------------------------- Optimize SEO Start
     // 当 titlebar 的文案与搜索的标题不一致时，请先设置 titlebar
     // 备注：this.$page.setMeta 需要引擎 1090 版本及以上才支持，因此这段做注释处理；
@@ -126,6 +181,37 @@ export default {
       })
     }
     // --------------------------------- Optimize SEO End
+  },
+
+  onShow() {
+    console.log('onshow')
+    let self = this
+    this.taskData2 = []
+
+
+    storage.get({
+      key: 'totalTaskData',
+      success: function(data) {
+        // console.log('show', JSON.parse(data))
+        let taskData3 = data ? JSON.parse(data) : []
+        // console.log('t2', self.taskData2)
+
+        const now = Date.now()
+        taskData3.forEach((item) => {
+          item.date[1] += 86399000
+          if (item.date[0] < Number(now) && item.date[1] > Number(now)) {
+            self.taskData2.push(item)
+          }
+        })
+
+        if(self.taskData2.length && self.taskData2.every((item) => item.checked === true )) {
+          self.state = 2
+        } else {
+          self.state = 1
+        }
+      }
+    })
+
   },
 
   onDetailBtnClick() {
@@ -142,7 +228,34 @@ export default {
   },
 
   handleChange(idx) {
-    this.taskData[idx].checked = !this.taskData[idx].checked
+    this.taskData2[idx].checked = !this.taskData2[idx].checked
+
+    if(this.taskData2.every((item) => item.checked === true)) {
+      this.state = 2
+    } else {
+      this.state = 1
+    }
+
+    let self = this
+    storage.set({
+      key: 'totalTaskData',
+      value: JSON.stringify(self.taskData2)
+      // value: '[]'
+    })
+
+  },
+
+  handleRouterChange(path) {
+    if(path === '/pages/TabBar') {
+      share.share({
+          shareType: 1,
+          title: '我有一个问题想请教',
+      })
+    } else {
+      router.push({
+        uri: path,
+      })
+    }
   }
 }
 </script>
@@ -186,10 +299,21 @@ export default {
       text-align: center;
     }
 
+    .now {
+
+    }
+
   }
 
   .middle {
-    padding: 15px 0;
+    padding: 20px 0 0;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    .tabbar {
+      flex-direction: column;
+      align-items: center;
+    }
   }
 
   .bottom {
@@ -208,6 +332,26 @@ export default {
       .item {
         height: 100px;
         margin: 0 20px;
+      }
+    }
+
+
+    .add-text {
+      margin-top: 150px;
+      flex-direction: row;
+      justify-content: center;
+
+      .text {
+        flex-direction: column;
+        margin-left: 40px;
+      }
+    }
+
+    .state-ok {
+      flex-direction: column;
+      align-items: center;
+      .img-wrapper {
+        margin: 15px
       }
     }
 

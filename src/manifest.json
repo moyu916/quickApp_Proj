@@ -48,6 +48,9 @@
       },
       "pages/AddTaskPage": {
         "component": "index"
+      },
+      "pages/TabBar": {
+        "component": "index"
       }
     },
     "widgets": {
@@ -73,6 +76,9 @@
       },
       "pages/AddTaskPage": {
         "titleBarText": "添加任务"
+      },
+      "pages/TabBar": {
+        "titleBarText": "今日任务完成情况统计"
       }
     }
   }

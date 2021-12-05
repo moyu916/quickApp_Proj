@@ -1,0 +1,77 @@
+<template>
+    <div class="wrapper">
+        <canvas id="chart" style="width: 600px; height: 400px;"></canvas>
+    </div>
+</template>
+
+<script>
+import Charts from 'apex-ui/components/charts/qacharts-min.js'
+import storage from '@system.storage'
+
+export default {
+    data() {
+        return {
+            todayTask: []
+        }
+    },
+
+    onShow() {
+      let self = this
+      storage.get({
+          key: 'todayTask',
+          success: function(data) {
+              self.todayTask = JSON.parse(data)
+
+              self.initChart()
+          }
+      })
+    },
+
+    initChart() {
+        let done = 0
+        let doing = 0
+        this.todayTask.forEach((item) => {
+          if (item.checked === true) {
+              done +=1
+          } else {
+              doing += 1
+          }
+        })
+
+        new Charts({
+            element: this.$element('chart'),
+            width: 600,
+            height: 400,
+            series: [
+                {
+                    name: "今日任务完成情况统计",
+                    type: "pie",
+                    data: [
+                        {
+                            name: '已完成',
+                            value: done / (done + doing) * 100
+                        },
+                        {
+                            name: '未完成',
+                            value: done+doing==0? 100 : doing / (done + doing) * 100
+                        }
+                    ]
+                }
+            ],         
+            onRenderComplete: () => {
+                console.log('done', done)
+                console.log('doing', done+doing==0? 100 : doing / (done + doing) * 100)
+                console.log('chartPie renderComplete')
+            },
+        })  
+    }
+}
+</script>
+
+<style lang="less">
+#chart {
+    margin: 100px auto;
+}
+</style>
+
+

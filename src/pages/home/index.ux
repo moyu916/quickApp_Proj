@@ -107,13 +107,13 @@ export default {
           },
           {
               iconPath: '../../assets/images/tab3.png',
-              pagePath: '/pages/TabBar/page3',
-              text: '百科',
+              pagePath: '/pages/TabBar',
+              text: '任务统计',
               active: false
           },
           {
               iconPath: '../../assets/images/tab4.png',
-              pagePath: '/pages/TabBar',
+              pagePath: '/pages/TabBar/page4',
               text: '问学长',
               active: false
           }
@@ -246,14 +246,21 @@ export default {
   },
 
   handleRouterChange(path) {
-    if(path === '/pages/TabBar') {
+    if(path === '/pages/TabBar/page4') {
       share.share({
           shareType: 1,
-          title: '我有一个问题想请教',
+          title: '您好~我有一个问题想请教',
       })
     } else {
-      router.push({
-        uri: path,
+      let self = this
+      storage.set({
+        key: 'todayTask',
+        value: JSON.stringify(self.taskData2),
+        success: function() {
+          router.push({
+            uri: path,
+          })
+        }
       })
     }
   }
